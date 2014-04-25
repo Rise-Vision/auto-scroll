@@ -8,7 +8,9 @@
 			scrollResumes: 5
 		},
 		timeline = null,
-		speed = 0;
+		scrollResumesTimer = null,
+		speed = 0,
+		previousDelta = 0;
 
 	function Plugin(element, options) {
 		this.element = element;
@@ -49,13 +51,47 @@
 					self.pause();
 				});
 
-				Hammer(this.element).on("drag", function() {
-					handleMove(event);
+				Hammer(this.element).on("drag", function(event) {
+					var swipeTimeline = new TimelineMax();	//Add this to the existing timeline so that the main timeline knows where to resume from?
+					var currentDelta = event.gesture.deltaY;
+					var margin = parseInt(self.page.css("margin-top"));
+					var newMargin = margin + currentDelta - previousDelta;
+
+					// Do nothing if we're already at the top and trying to scroll down.
+					if ((margin === 0) && (currentDelta - previousDelta > 0)) {
+						return;
+					}
+					// Do nothing if we're already at the bottom and trying to scroll up.
+					else if (((margin + self.page.outerHeight()) === $(self.element).outerHeight(true)) &&
+						(currentDelta - previousDelta < 0)) {
+						return;
+					}
+					// Don't scroll past the top of the content.
+					else if (newMargin > 0) {
+						newMargin = 0;
+					}
+					// Don't scroll past the bottom of the content.
+					else if (newMargin < ($(self.element).outerHeight(true) - self.page.outerHeight())) {
+						newMargin = $(self.element).outerHeight(true) - self.page.outerHeight();
+					}
+
+					swipeTimeline.to(self.page, 0.01, {
+						marginTop: newMargin,
+						ease: Linear.easeNone
+					});
+
+					previousDelta = currentDelta;
 				});
 
 				Hammer(this.element).on("dragend", function() {
-					delta = 0;
+					// Resume scrolling after "Scroll Resumes" time has passed.
+					clearTimeout(scrollResumesTimer);
 
+					scrollResumesTimer = setTimeout(function() {
+						self.play();
+					}, self.options.scrollResumes * 1000);
+
+					previousDelta = 0;
 					$(self.element).trigger("onSwipeEnd");
 				});
 			}
@@ -84,7 +120,6 @@
 			});
 
 			//Scroll back to start.
-			//timeline.to(this.page, this.getDuration(300), {
 			timeline.to(this.page, 2, {
 				marginTop: 0,
 				delay: this.options.scrollResumes,
