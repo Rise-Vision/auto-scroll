@@ -1,11 +1,14 @@
 ;(function ($, window, document, undefined) {
+	"use strict";
+
 	var pluginName = "auto-scroll",
 		defaults = {
 			scrollBy: "item",
-			speed: "medium",
-			swipingTimeout: 5000
+			scrollSpeed: "medium",
+			scrollResumes: 5
 		},
-		timeline = null;
+		timeline = null,
+		speed = 0;
 
 	function Plugin(element, options) {
 		this.element = element;
@@ -20,17 +23,17 @@
 			this.page = $(this.element).find(".page");
 
 			// Set scroll speed.
-			if (this.options.scrollBy == "continuous") {
-				if (this.options.speed == "fastest") {
+			if (this.options.scrollBy === "continuous") {
+				if (this.options.scrollSpeed === "fastest") {
 					speed = 50;
 				}
-				else if (this.options.speed == "fast") {
+				else if (this.options.scrollSpeed === "fast") {
 					speed = 40;
 				}
-				else if (this.options.speed == "medium") {
+				else if (this.options.scrollSpeed === "medium") {
 					speed = 30;
 				}
-				else if (this.options.speed == "slow") {
+				else if (this.options.scrollSpeed === "slow") {
 					speed = 20;
 				}
 				else {
@@ -38,18 +41,23 @@
 				}
 			}
 		},
+		// Check if content is larger than viewable area.
+		canScroll: function() {
+			return this.page.height() > $(this.element).height();
+		},
 		getDuration: function(pixelsPerSecond) {
 			var duration = Math.abs((this.page.outerHeight(true) - $(this.element).outerHeight(true)) / pixelsPerSecond);
-			console.log(duration);
+
 			return duration;
 		},
-		/* Scroll items continuously without stopping. */
+		// Scroll items continuously without stopping.
 		startContinuousScroll: function() {
 			timeline = new TimelineMax({ repeat: -1 });
 
 			//Scroll to end of content.
 			timeline.to(this.page, this.getDuration(speed), {
 				marginTop: -(this.page.outerHeight(true) - $(this.element).outerHeight(true)),
+				delay: this.options.scrollResumes,
 				ease: Linear.easeNone,
 				onComplete: function() {
 					$(this.element).trigger("onLastItemScrolled");
@@ -57,8 +65,10 @@
 			});
 
 			//Scroll back to start.
-			timeline.to(this.page, this.getDuration(300), {
+			//timeline.to(this.page, this.getDuration(300), {
+			timeline.to(this.page, 2, {
 				marginTop: 0,
+				delay: this.options.scrollResumes,
 				ease: Linear.easeNone,
 				onComplete: function() {
 					$(this.element).trigger("onLastItemScrolled");
@@ -68,12 +78,14 @@
 	};
 
 	Plugin.prototype.play = function() {
-		if (this.options.scrollBy === "continuous") {
-			if (timeline) {
-				timeline.resume();
-			}
-			else {
-				this.startContinuousScroll();
+		if (this.canScroll() && (this.options.scrollBy !== "none")) {
+			if (this.options.scrollBy === "continuous") {
+				if (timeline) {
+					timeline.resume();
+				}
+				else {
+					this.startContinuousScroll();
+				}
 			}
 		}
 	};
