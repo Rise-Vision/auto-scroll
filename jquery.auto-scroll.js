@@ -58,9 +58,10 @@
 						speed = 2;
 					}
 
-					duration = this.page.outerHeight(true) / $(this.element).outerHeight(true) * speed;
+					duration = this.page.outerHeight(true) /
+						$(this.element).outerHeight(true) * speed;
 				}
-				else {	// Continuous or by item
+				else {	// Continuous or by row
 					if (this.options.scrollSpeed === "fastest") {
 						speed = 50;
 					}
@@ -77,7 +78,8 @@
 						speed = 10;
 					}
 
-					duration = Math.abs((this.page.outerHeight(true) - $(this.element).outerHeight(true)) / speed);
+					duration = Math.abs((this.page.outerHeight(true) -
+						$(this.element).outerHeight(true)) / speed);
 				}
 
 				Draggable.create(this.element, {
@@ -94,12 +96,16 @@
 						TweenLite.killDelayedCallsTo(pageComplete);
 					},
 					onRelease: function() {
-						// Figure out what the new scroll position is and translate that
-						// into the progress of the tween (0-1) so that we can calibrate it;
-						// otherwise it'd jump back to where it paused when we resume().
-						TweenLite.delayedCall(self.options.scrollResumes, calculateProgress = function() {
-							tween.progress($(self.element).scrollTop() / max).play();
-						});
+						/* Figure out what the new scroll position is and
+						   translate that into the progress of the tween (0-1)
+						   so that we can calibrate it; otherwise, it'd jump
+						   back to where it paused when we resume(). */
+						TweenLite.delayedCall(self.options.scrollResumes,
+							calculateProgress = function() {
+								tween.progress($(self.element).scrollTop() / max)
+									.play();
+							}
+						);
 					}
 				});
 
@@ -117,32 +123,36 @@
 							// Next height at which to pause scrolling.
 							pauseHeight += elementHeight;
 
-							TweenLite.delayedCall(self.options.scrollResumes, pageComplete = function() {
-								tween.resume();
-							});
+							TweenLite.delayedCall(self.options.scrollResumes,
+								pageComplete = function() {
+									tween.resume();
+								}
+							);
 						}
 					} : undefined),
 					onComplete: function() {
-						TweenLite.delayedCall(self.options.scrollResumes, scrollComplete = function() {
-							TweenLite.to(self.page, 1, {
-								autoAlpha: 0,
-								onComplete: function() {
-									tween.seek(0).pause();
+						TweenLite.delayedCall(self.options.scrollResumes,
+							scrollComplete = function() {
+								TweenLite.to(self.page, 1, {
+									autoAlpha: 0,
+									onComplete: function() {
+										tween.seek(0).pause();
 
-									TweenLite.to(self.page, 1, {
-										autoAlpha: 1,
-										onComplete: function() {
-											if (self.options.scrollBy === "page") {
-												pauseHeight = elementHeight;
+										TweenLite.to(self.page, 1, {
+											autoAlpha: 1,
+											onComplete: function() {
+												if (self.options.scrollBy === "page") {
+													pauseHeight = elementHeight;
+												}
+
+												// TODO: Trigger an event instead and let the Widget decide how to handle it?
+												doneEvent();
 											}
-
-											// TODO: Trigger an event instead and let the Widget decide how to handle it?
-											doneEvent();
-										}
-									});
-								}
-							});
-						});
+										});
+									}
+								});
+							}
+						);
 					}
 				});
 
@@ -164,9 +174,11 @@
 					isLoading = false;
 				}
 				else {
-					TweenLite.delayedCall(this.options.scrollResumes, resumeTween = function() {
+					TweenLite.delayedCall(this.options.scrollResumes,
+							resumeTween = function() {
 						tween.play();
-					});
+						}
+					);
 				}
 			}
 		}
@@ -187,7 +199,8 @@
 		this.page = null;
 	};
 
-	// A lightweight plugin wrapper around the constructor that prevents multiple instantiations.
+	// A lightweight plugin wrapper around the constructor that prevents
+	// multiple instantiations.
 	$.fn.autoScroll = function(options) {
 		return this.each(function() {
 			if (!$.data(this, "plugin_" + pluginName)) {
