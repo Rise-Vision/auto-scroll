@@ -145,8 +145,7 @@
 													pauseHeight = elementHeight;
 												}
 
-												// TODO: Trigger an event instead and let the Widget decide how to handle it?
-												doneEvent();
+												$(self.element).trigger("done");
 											}
 										});
 									}
