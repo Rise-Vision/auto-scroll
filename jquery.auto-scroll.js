@@ -102,6 +102,10 @@
 						   back to where it paused when we resume(). */
 						TweenLite.delayedCall(self.options.scrollResumes,
 							calculateProgress = function() {
+								// Set pauseHeight to new value.
+								pauseHeight = $(self.element).scrollTop() +
+									elementHeight;
+
 								tween.progress($(self.element).scrollTop() / max)
 									.play();
 							}
