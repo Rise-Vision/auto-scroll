@@ -63,19 +63,19 @@
 				}
 				else {	// Continuous or by row
 					if (this.options.scrollSpeed === "fastest") {
-						speed = 50;
+						speed = 60;
 					}
 					else if (this.options.scrollSpeed === "fast") {
-						speed = 40;
+						speed = 50;
 					}
 					else if (this.options.scrollSpeed === "medium") {
-						speed = 30;
+						speed = 40;
 					}
 					else if (this.options.scrollSpeed === "slow") {
-						speed = 20;
+						speed = 30;
 					}
 					else {
-						speed = 10;
+						speed = 20;
 					}
 
 					duration = Math.abs((this.page.outerHeight(true) -
