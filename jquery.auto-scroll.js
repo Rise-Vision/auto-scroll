@@ -157,7 +157,7 @@
 				});
 
 				// Hide scrollbar.
-				TweenLite.set(this.element, { clearProps:"overflowY" });
+				TweenLite.set(this.element, { overflowY: "hidden" });
 			}
 		},
 		// Check if content is larger than viewable area.
