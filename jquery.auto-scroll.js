@@ -10,9 +10,9 @@
 
 	var pluginName = "autoScroll",
 		defaults = {
-			scrollBy: "continuous",
-			scrollSpeed: "medium",
-			scrollResumes: 5
+			by: "continuous",
+			speed: "medium",
+			pause: 5
 		},
 		isLoading = true,
 		draggable = null,
@@ -41,17 +41,17 @@
 
 			if (this.canScroll()) {
 				// Set scroll speed.
-				if (this.options.scrollBy === "page") {
-					if (this.options.scrollSpeed === "fastest") {
+				if (this.options.by === "page") {
+					if (this.options.speed === "fastest") {
 						speed = 0.4;
 					}
-					else if (this.options.scrollSpeed === "fast") {
+					else if (this.options.speed === "fast") {
 						speed = 0.8;
 					}
-					else if (this.options.scrollSpeed === "medium") {
+					else if (this.options.speed === "medium") {
 						speed = 1.2;
 					}
-					else if (this.options.scrollSpeed === "slow") {
+					else if (this.options.speed === "slow") {
 						speed = 1.6;
 					}
 					else {
@@ -62,16 +62,16 @@
 						$(this.element).outerHeight(true) * speed;
 				}
 				else {	// Continuous or by row
-					if (this.options.scrollSpeed === "fastest") {
+					if (this.options.speed === "fastest") {
 						speed = 60;
 					}
-					else if (this.options.scrollSpeed === "fast") {
+					else if (this.options.speed === "fast") {
 						speed = 50;
 					}
-					else if (this.options.scrollSpeed === "medium") {
+					else if (this.options.speed === "medium") {
 						speed = 40;
 					}
-					else if (this.options.scrollSpeed === "slow") {
+					else if (this.options.speed === "slow") {
 						speed = 30;
 					}
 					else {
@@ -100,7 +100,7 @@
 						   translate that into the progress of the tween (0-1)
 						   so that we can calibrate it; otherwise, it'd jump
 						   back to where it paused when we resume(). */
-						TweenLite.delayedCall(self.options.scrollResumes,
+						TweenLite.delayedCall(self.options.pause,
 							calculateProgress = function() {
 								// Set pauseHeight to new value.
 								pauseHeight = $(self.element).scrollTop() +
@@ -118,16 +118,16 @@
 				tween = TweenLite.to(draggable.scrollProxy, duration, {
 					scrollTop: max,
 					ease: Linear.easeNone,
-					delay: this.options.scrollResumes,
+					delay: this.options.pause,
 					paused: true,
-					onUpdate: (this.options.scrollBy === "page" ? function() {
+					onUpdate: (this.options.by === "page" ? function() {
 						if (Math.abs(draggable.scrollProxy.top()) >= pauseHeight) {
 							tween.pause();
 
 							// Next height at which to pause scrolling.
 							pauseHeight += elementHeight;
 
-							TweenLite.delayedCall(self.options.scrollResumes,
+							TweenLite.delayedCall(self.options.pause,
 								pageComplete = function() {
 									tween.resume();
 								}
@@ -135,7 +135,7 @@
 						}
 					} : undefined),
 					onComplete: function() {
-						TweenLite.delayedCall(self.options.scrollResumes,
+						TweenLite.delayedCall(self.options.pause,
 							scrollComplete = function() {
 								TweenLite.to(self.page, 1, {
 									autoAlpha: 0,
@@ -145,7 +145,7 @@
 										TweenLite.to(self.page, 1, {
 											autoAlpha: 1,
 											onComplete: function() {
-												if (self.options.scrollBy === "page") {
+												if (self.options.by === "page") {
 													pauseHeight = elementHeight;
 												}
 
@@ -170,14 +170,14 @@
 	};
 
 	Plugin.prototype.play = function() {
-		if (this.canScroll() && (this.options.scrollBy !== "none")) {
+		if (this.canScroll() && (this.options.by !== "none")) {
 			if (tween) {
 				if (isLoading) {
 					tween.play();
 					isLoading = false;
 				}
 				else {
-					TweenLite.delayedCall(this.options.scrollResumes,
+					TweenLite.delayedCall(this.options.pause,
 							resumeTween = function() {
 						tween.play();
 						}
