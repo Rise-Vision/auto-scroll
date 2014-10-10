@@ -148,6 +148,9 @@
 												if (self.options.by === "page") {
 													pauseHeight = elementHeight;
 												}
+												//restart scrolling once the page has been reset to the top
+												tween.play();
+
 
 												$(self.element).trigger("done");
 											}
