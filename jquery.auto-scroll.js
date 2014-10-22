@@ -163,14 +163,14 @@
 				TweenLite.set(this.element, { overflowY: "hidden" });
 			}
 		},
-		// Check if content is larger than viewable area.
+		// Check if content is larger than viewable area and if the scroll settings is set to actually scroll.
 		canScroll: function() {
-			return this.page.height() > $(this.element).height();
+			return (this.options && this.options.by !== "none" ) this.page.height() > $(this.element).height();
 		}
 	};
 
 	Plugin.prototype.play = function() {
-		if (this.canScroll() && (this.options.by !== "none")) {
+		if (this.canScroll()) {
 			if (tween) {
 				if (isLoading) {
 					tween.play();
