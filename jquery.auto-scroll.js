@@ -96,20 +96,22 @@
 						TweenLite.killDelayedCallsTo(pageComplete);
 					},
 					onRelease: function() {
-						/* Figure out what the new scroll position is and
-						   translate that into the progress of the tween (0-1)
-						   so that we can calibrate it; otherwise, it'd jump
-						   back to where it paused when we resume(). */
-						TweenLite.delayedCall(self.options.pause,
-							calculateProgress = function() {
-								// Set pauseHeight to new value.
-								pauseHeight = $(self.element).scrollTop() +
+						if (self.options.by !== "none") {
+							/* Figure out what the new scroll position is and
+							 translate that into the progress of the tween (0-1)
+							 so that we can calibrate it; otherwise, it'd jump
+							 back to where it paused when we resume(). */
+							TweenLite.delayedCall(self.options.pause,
+								calculateProgress = function() {
+									// Set pauseHeight to new value.
+									pauseHeight = $(self.element).scrollTop() +
 									elementHeight;
 
-								tween.progress($(self.element).scrollTop() / max)
-									.play();
-							}
-						);
+									tween.progress($(self.element).scrollTop() / max)
+										.play();
+								}
+							);
+						}
 					}
 				});
 
@@ -165,13 +167,12 @@
 		},
 		// Check if content is larger than viewable area and if the scroll settings is set to actually scroll.
 		canScroll: function() {
-			return this.options && (this.options.by !== "none") &&
-        (this.page.height() > $(this.element).height());
+			return this.options && (this.page.height() > $(this.element).height());
 		}
 	};
 
 	Plugin.prototype.play = function() {
-		if (this.canScroll()) {
+		if (this.canScroll() && this.options.by !== "none") {
 			if (tween) {
 				if (isLoading) {
 					tween.play();
