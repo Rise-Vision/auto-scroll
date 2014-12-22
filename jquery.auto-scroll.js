@@ -144,16 +144,11 @@
 									onComplete: function() {
 										tween.seek(0).pause();
 
-										TweenLite.to(self.page, 1, {
-											autoAlpha: 1,
-											onComplete: function() {
-												if (self.options.by === "page") {
-													pauseHeight = elementHeight;
-												}
+										if (self.options.by === "page") {
+											pauseHeight = elementHeight;
+										}
 
-												$(self.element).trigger("done");
-											}
-										});
+										$(self.element).trigger("done");
 									}
 								});
 							}
@@ -179,6 +174,7 @@
 					isLoading = false;
 				}
 				else {
+					TweenLite.to(this.page, 1, {autoAlpha: 1});
 					TweenLite.delayedCall(this.options.pause,
 							resumeTween = function() {
 						tween.play();
