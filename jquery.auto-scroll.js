@@ -17,7 +17,8 @@
 		isLoading = true,
 		draggable = null,
 		tween = null,
-		resumeTween = null;
+		resumeTween = null,
+		calculateProgress = null;
 
 	function Plugin(element, options) {
 		this.element = element;
@@ -32,7 +33,6 @@
 		init: function () {
 			var speed, duration;
 			var self = this;
-			var calculateProgress = null;
 			var scrollComplete = null;
 			var pageComplete = null;
 			var elementHeight = $(this.element).outerHeight(true);
@@ -105,7 +105,7 @@
 								calculateProgress = function() {
 									// Set pauseHeight to new value.
 									pauseHeight = $(self.element).scrollTop() +
-									elementHeight;
+										elementHeight;
 
 									tween.progress($(self.element).scrollTop() / max)
 										.play();
@@ -176,8 +176,8 @@
 				else {
 					TweenLite.to(this.page, 1, {autoAlpha: 1});
 					TweenLite.delayedCall(this.options.pause,
-							resumeTween = function() {
-						tween.play();
+						resumeTween = function() {
+							tween.play();
 						}
 					);
 				}
@@ -186,12 +186,16 @@
 	};
 
 	Plugin.prototype.pause = function() {
+		TweenLite.killDelayedCallsTo(calculateProgress);
+
 		if (tween) {
 			tween.pause();
 		}
 	};
 
 	Plugin.prototype.stop = function() {
+		TweenLite.killDelayedCallsTo(calculateProgress);
+
 		if (tween) {
 			tween.kill();
 		}
