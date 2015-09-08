@@ -18,7 +18,8 @@
 		draggable = null,
 		tween = null,
 		resumeTween = null,
-		calculateProgress = null;
+		calculateProgress = null,
+		frozen = false;
 
 	function Plugin(element, options) {
 		this.element = element;
@@ -82,6 +83,15 @@
 						$(this.element).outerHeight(true)) / speed);
 				}
 
+				calculateProgress = function() {
+					// Set pauseHeight to new value.
+					pauseHeight = $(self.element).scrollTop() +
+						elementHeight;
+
+					tween.progress($(self.element).scrollTop() / max)
+						.play();
+				};
+
 				Draggable.create(this.element, {
 					type: "scrollTop",
 					throwProps: true,
@@ -101,16 +111,7 @@
 							 translate that into the progress of the tween (0-1)
 							 so that we can calibrate it; otherwise, it'd jump
 							 back to where it paused when we resume(). */
-							TweenLite.delayedCall(self.options.pause,
-								calculateProgress = function() {
-									// Set pauseHeight to new value.
-									pauseHeight = $(self.element).scrollTop() +
-										elementHeight;
-
-									tween.progress($(self.element).scrollTop() / max)
-										.play();
-								}
-							);
+							TweenLite.delayedCall(self.options.pause, calculateProgress);
 						}
 					}
 				});
@@ -172,6 +173,9 @@
 				if (isLoading) {
 					tween.play();
 					isLoading = false;
+				} else if (frozen) {
+					calculateProgress();
+					frozen = false;
 				}
 				else {
 					TweenLite.to(this.page, 1, {autoAlpha: 1});
@@ -185,16 +189,22 @@
 		}
 	};
 
-	Plugin.prototype.pause = function() {
-		TweenLite.killDelayedCallsTo(calculateProgress);
+	Plugin.prototype.pause = function(freeze) {
+		if (freeze) {
+			TweenLite.killDelayedCallsTo(calculateProgress);
+			frozen = true;
+		}
 
 		if (tween) {
 			tween.pause();
 		}
 	};
 
-	Plugin.prototype.stop = function() {
-		TweenLite.killDelayedCallsTo(calculateProgress);
+	Plugin.prototype.stop = function(freeze) {
+		if (freeze) {
+			TweenLite.killDelayedCallsTo(calculateProgress);
+			frozen = true;
+		}
 
 		if (tween) {
 			tween.kill();
