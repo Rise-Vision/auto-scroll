@@ -12,13 +12,15 @@
 		defaults = {
 			by: "continuous",
 			speed: "medium",
-			pause: 5
+			pause: 5,
+			click: false
 		},
 		isLoading = true,
 		draggable = null,
 		tween = null,
 		resumeTween = null,
-		calculateProgress = null;
+		calculateProgress = null,
+		clicked = false;
 
 	function Plugin(element, options) {
 		this.element = element;
@@ -38,6 +40,25 @@
 			var elementHeight = $(this.element).outerHeight(true);
 			var pauseHeight = elementHeight;
 			var max = this.element.scrollHeight - this.element.offsetHeight;
+
+			function pauseTween() {
+				tween.pause();
+
+				TweenLite.killDelayedCallsTo(calculateProgress);
+				TweenLite.killDelayedCallsTo(scrollComplete);
+				TweenLite.killDelayedCallsTo(resumeTween);
+				// Only used when scrolling by page.
+				TweenLite.killDelayedCallsTo(pageComplete);
+			}
+
+			calculateProgress = function() {
+				// Set pauseHeight to new value.
+				pauseHeight = $(self.element).scrollTop() +
+					elementHeight;
+
+				tween.progress($(self.element).scrollTop() / max)
+					.play();
+			};
 
 			if (this.canScroll()) {
 				// Set scroll speed.
@@ -87,13 +108,8 @@
 					throwProps: true,
 					edgeResistance: 0.75,
 					onPress: function() {
-						tween.pause();
-
-						TweenLite.killDelayedCallsTo(calculateProgress);
-						TweenLite.killDelayedCallsTo(scrollComplete);
-						TweenLite.killDelayedCallsTo(resumeTween);
-						// Only used when scrolling by page.
-						TweenLite.killDelayedCallsTo(pageComplete);
+						pauseTween();
+						clicked = false;
 					},
 					onRelease: function() {
 						if (self.options.by !== "none") {
@@ -101,16 +117,14 @@
 							 translate that into the progress of the tween (0-1)
 							 so that we can calibrate it; otherwise, it'd jump
 							 back to where it paused when we resume(). */
-							TweenLite.delayedCall(self.options.pause,
-								calculateProgress = function() {
-									// Set pauseHeight to new value.
-									pauseHeight = $(self.element).scrollTop() +
-										elementHeight;
-
-									tween.progress($(self.element).scrollTop() / max)
-										.play();
-								}
-							);
+							TweenLite.delayedCall(self.options.pause, calculateProgress);
+						}
+					},
+					onClick: function() {
+						if (self.options.click) {
+							pauseTween();
+							clicked = true;
+							$(self.element).trigger("scrollClick", [this.pointerEvent]);
 						}
 					}
 				});
@@ -172,6 +186,9 @@
 				if (isLoading) {
 					tween.play();
 					isLoading = false;
+				} else if (clicked) {
+					calculateProgress();
+					clicked = false;
 				}
 				else {
 					TweenLite.to(this.page, 1, {autoAlpha: 1});
@@ -186,16 +203,12 @@
 	};
 
 	Plugin.prototype.pause = function() {
-		TweenLite.killDelayedCallsTo(calculateProgress);
-
 		if (tween) {
 			tween.pause();
 		}
 	};
 
 	Plugin.prototype.stop = function() {
-		TweenLite.killDelayedCallsTo(calculateProgress);
-
 		if (tween) {
 			tween.kill();
 		}

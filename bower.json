@@ -1,8 +1,10 @@
 {
   "name": "auto-scroll",
+  "version": "1.0.0",
   "homepage": "https://github.com/Rise-Vision/auto-scroll",
   "authors": [
-    "donnapep"
+    "donnapep",
+    "stulees"
   ],
   "description": "Auto-scroll is a jQuery plugin that can be integrated into Widgets to enable auto-scroll and swipe functionality.",
   "main": "jquery.auto-scroll.js",
