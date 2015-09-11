@@ -18,9 +18,7 @@
 		isLoading = true,
 		draggable = null,
 		tween = null,
-		resumeTween = null,
-		calculateProgress = null,
-		clicked = false;
+		calculateProgress = null;
 
 	function Plugin(element, options) {
 		this.element = element;
@@ -46,7 +44,6 @@
 
 				TweenLite.killDelayedCallsTo(calculateProgress);
 				TweenLite.killDelayedCallsTo(scrollComplete);
-				TweenLite.killDelayedCallsTo(resumeTween);
 				// Only used when scrolling by page.
 				TweenLite.killDelayedCallsTo(pageComplete);
 			}
@@ -109,7 +106,6 @@
 					edgeResistance: 0.75,
 					onPress: function() {
 						pauseTween();
-						clicked = false;
 					},
 					onRelease: function() {
 						if (self.options.by !== "none") {
@@ -123,7 +119,6 @@
 					onClick: function() {
 						if (self.options.click) {
 							pauseTween();
-							clicked = true;
 							$(self.element).trigger("scrollClick", [this.pointerEvent]);
 						}
 					}
@@ -186,17 +181,10 @@
 				if (isLoading) {
 					tween.play();
 					isLoading = false;
-				} else if (clicked) {
-					calculateProgress();
-					clicked = false;
 				}
 				else {
 					TweenLite.to(this.page, 1, {autoAlpha: 1});
-					TweenLite.delayedCall(this.options.pause,
-						resumeTween = function() {
-							tween.play();
-						}
-					);
+					TweenLite.delayedCall(this.options.pause, calculateProgress);
 				}
 			}
 		}
@@ -204,12 +192,14 @@
 
 	Plugin.prototype.pause = function() {
 		if (tween) {
+			TweenLite.killDelayedCallsTo(calculateProgress);
 			tween.pause();
 		}
 	};
 
 	Plugin.prototype.stop = function() {
 		if (tween) {
+			TweenLite.killDelayedCallsTo(calculateProgress);
 			tween.kill();
 		}
 
