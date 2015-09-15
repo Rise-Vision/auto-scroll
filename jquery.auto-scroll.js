@@ -168,6 +168,21 @@
 
 				// Hide scrollbar.
 				TweenLite.set(this.element, { overflowY: "hidden" });
+			} else {
+				if (this.options.click) {
+					// Account for content that is to be clicked when content not needed to be scrolled
+					// Leverage Draggable for touch/click event handling
+					Draggable.create(this.element, {
+						type: "scrollTop",
+						throwProps: true,
+						edgeResistance: 0.95,
+						onClick: function() {
+							$(self.element).trigger("scrollClick", [this.pointerEvent]);
+						}
+					});
+
+					this.draggable = Draggable.get(this.element);
+				}
 			}
 		},
 		// Check if content is larger than viewable area and if the scroll settings is set to actually scroll.
@@ -176,8 +191,13 @@
 		},
 		destroy: function() {
 			$(this.element).removeData();
-			this.tween.kill();
-			this.draggable.kill();
+			if (this.tween) {
+				this.tween.kill();
+			}
+
+			if (this.draggable) {
+				this.draggable.kill();
+			}
 
 			// Remove elements.
 			this.element = null;
