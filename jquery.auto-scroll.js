@@ -80,7 +80,7 @@
 					duration = this.page.outerHeight(true) /
 						$(this.element).outerHeight(true) * speed;
 				}
-				else {	// Continuous or by row
+				else {  // Continuous or by row
 					if (this.options.speed === "fastest") {
 						speed = 60;
 					}
@@ -173,6 +173,20 @@
 		// Check if content is larger than viewable area and if the scroll settings is set to actually scroll.
 		canScroll: function() {
 			return this.options && (this.page.height() > $(this.element).height());
+		},
+		destroy: function() {
+			$(this.element).removeData();
+			this.tween.kill();
+			this.draggable.kill();
+
+			// Remove elements.
+			this.element = null;
+			this.page = null;
+			this.options = null;
+			this._defaults = null;
+			this.draggable = null;
+			this.tween = null;
+			this.calculateProgress = null;
 		}
 	};
 
