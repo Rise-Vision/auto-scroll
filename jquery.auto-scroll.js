@@ -13,7 +13,8 @@
 			by: "continuous",
 			speed: "medium",
 			pause: 5,
-			click: false
+			click: false,
+			minimumMovement: 3 // Draggable default value - http://greensock.com/docs/#/HTML5/Drag/Draggable/
 		};
 
 
@@ -105,6 +106,7 @@
 					type: "scrollTop",
 					throwProps: true,
 					edgeResistance: 0.75,
+					minimumMovement: self.options.minimumMovement,
 					onPress: function() {
 						pauseTween();
 					},
@@ -176,6 +178,7 @@
 						type: "scrollTop",
 						throwProps: true,
 						edgeResistance: 0.95,
+						minimumMovement: this.options.minimumMovement,
 						onClick: function() {
 							$(self.element).trigger("scrollClick", [this.pointerEvent]);
 						}
