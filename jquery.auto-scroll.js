@@ -12,6 +12,7 @@
 		defaults = {
 			by: "continuous",
 			speed: "medium",
+			duration: 10,
 			pause: 5,
 			click: false,
 			minimumMovement: 3 // Draggable default value - http://greensock.com/docs/#/HTML5/Drag/Draggable/
@@ -132,7 +133,7 @@
 				this.tween = TweenLite.to(this.draggable.scrollProxy, duration, {
 					scrollTop: max,
 					ease: Linear.easeNone,
-					delay: this.options.pause,
+					delay: (this.options.by === "page") ? this.options.duration : this.options.pause,
 					paused: true,
 					onUpdate: (this.options.by === "page" ? function() {
 						if (Math.abs(self.draggable.scrollProxy.top()) >= pauseHeight) {
@@ -141,7 +142,7 @@
 							// Next height at which to pause scrolling.
 							pauseHeight += elementHeight;
 
-							TweenLite.delayedCall(self.options.pause,
+							TweenLite.delayedCall(self.options.duration,
 								pageComplete = function() {
 									self.tween.resume();
 								}
@@ -149,7 +150,7 @@
 						}
 					} : undefined),
 					onComplete: function() {
-						TweenLite.delayedCall(self.options.pause,
+						TweenLite.delayedCall((self.options.by === "page") ? self.options.duration : self.options.pause,
 							scrollComplete = function() {
 								TweenLite.to(self.page, 1, {
 									autoAlpha: 0,
@@ -222,7 +223,7 @@
 				}
 				else {
 					TweenLite.to(this.page, 1, {autoAlpha: 1});
-					TweenLite.delayedCall(this.options.pause, this.calculateProgress);
+					TweenLite.delayedCall((this.options.by === "page") ? this.options.duration : this.options.pause, this.calculateProgress);
 				}
 			}
 		}
