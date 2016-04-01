@@ -1,0 +1,35 @@
+{
+  "name": "auto-scroll",
+  "version": "2.0.0",
+  "description": "Auto-scroll is a jQuery plugin that can be integrated into Widgets to enable auto-scroll and swipe functionality.",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "gulp test",
+    "build": "gulp build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Rise-Vision/auto-scroll.git"
+  },
+  "author": "Rise Vision",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/Rise-Vision/auto-scroll/issues"
+  },
+  "homepage": "https://github.com/Rise-Vision/auto-scroll",
+  "devDependencies": {
+    "colors": "~1.0.3",
+    "del": "~1.1.1",
+    "gulp": "~3.8.3",
+    "gulp-bower": "~0.0.10",
+    "gulp-bump": "~0.1.8",
+    "gulp-concat": "^2.2.0",
+    "gulp-jshint": "~1.5.5",
+    "gulp-rename": "~1.2.0",
+    "gulp-uglify": "^0.3.1",
+    "gulp-watch": "^0.6.8",
+    "jshint-stylish": "^0.2.0",
+    "run-sequence": "^0.3.2",
+    "web-component-tester": "*"
+  }
+}

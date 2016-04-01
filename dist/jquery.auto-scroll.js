@@ -1,9 +1,11 @@
 /*
  *  Project: Auto-Scroll
  *  Description: Auto-scroll plugin for use with Rise Vision Widgets
- *  Author: @donnapep
+ *  Author: @Rise-Vision
  *  License: MIT
  */
+
+/* global TweenLite, Linear, Draggable */
 
 ;(function ($, window, document, undefined) {
 	"use strict";
