@@ -238,16 +238,6 @@
 		}
 	};
 
-	Plugin.prototype.stop = function() {
-		if (this.tween) {
-			TweenLite.killDelayedCallsTo(this.calculateProgress);
-			this.tween.kill();
-		}
-
-		this.element = null;
-		this.page = null;
-	};
-
 	// A lightweight plugin wrapper around the constructor that prevents
 	// multiple instantiations.
 	$.fn.autoScroll = function(options) {
