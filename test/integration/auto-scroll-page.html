@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>auto-scroll</title>
+
+  <script src="../../components/web-component-tester/browser.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    p {
+      padding: 15px;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div id="container1">
+  <div class="page"></div>
+</div>
+
+<hr>
+
+<div id="container2">
+  <div class="page"></div>
+</div>
+
+<script src="../../components/jquery/dist/jquery.min.js"></script>
+
+<!-- Club GreenSock Members Only Plugin, subject to its own license: http://greensock.com/club/ -->
+<script src="//s3.amazonaws.com/rise-common/scripts/greensock/ThrowPropsPlugin.min.js"></script>
+
+<script src="../../components/gsap/src/uncompressed/TweenLite.js"></script>
+<script src="../../components/gsap/src/uncompressed/plugins/CSSPlugin.js"></script>
+<script src="../../components/gsap/src/uncompressed/utils/Draggable.js"></script>
+<script src="../../components/gsap/src/uncompressed/plugins/ScrollToPlugin.js"></script>
+
+<script src="../../src/js/jquery.auto-scroll.js"></script>
+<script src="../../test/data/helper.js"></script>
+
+<script>
+
+  suite("auto-scroll by 'page'", function () {
+
+
+    suite("content too small to scroll", function () {
+      var $container, $page;
+
+      suiteSetup(function () {
+        $container = $("#container1");
+        $page = $("#container1 .page");
+        $container.width(640);
+        $container.height(300);
+        $container.css("backgroundColor", "#ffcc00");
+
+        // add one paragraph, not enough content to auto-scroll
+        $page.append(getSampleParagraph());
+
+        // use "none" as 'type' value
+        $container.autoScroll({
+          "by": "page"
+        });
+      });
+
+      suite("initialization", function () {
+        test("should not revise HTML markup due to not enough content to scroll", function () {
+          assert.isNull(document.querySelector("#container1 div div.page"));
+        });
+
+        test("should not apply scrolling css", function () {
+          assert.equal($container.css("overflow"), "visible");
+          assert.equal($container.css("cursor"), "auto");
+        });
+      });
+
+      suite("canScroll()", function () {
+        test("should return false", function () {
+          assert.isFalse($container.data("plugin_autoScroll").canScroll());
+        });
+      });
+
+      suite("destroy()", function () {
+        test("should remove autoscroll from container using destroy()", function () {
+          assert.isDefined($container.data("plugin_autoScroll"));
+
+          $container.data("plugin_autoScroll").destroy();
+
+          assert.isUndefined($container.data("plugin_autoScroll"), "plugin removed");
+        });
+      });
+
+    });
+
+    suite("scrollable content", function () {
+      var spy = sinon.spy(),
+        $container, $page;
+
+      suiteSetup(function () {
+        $container = $("#container2");
+        $page = $("#container2 .page");
+        $container.width(640);
+        $container.height(300);
+        $container.css("backgroundColor", "#ffcc00");
+
+        // add many paragraphs to create enough content to auto-scroll
+        while($page.height() < 500) {
+          $page.append(getSampleParagraph());
+        }
+
+        $container.autoScroll({
+          "by": "page",
+          "duration": 5,
+          "pause": 1
+        }).on("done", spy);
+      });
+
+      suite("initialization", function () {
+        test("should revise HTML markup for auto-scroll purposes", function () {
+          assert.isNotNull(document.querySelector("#container2 div div.page"));
+        });
+
+        test("should apply auto-scroll specific css", function () {
+          assert.equal($container.css("overflow"), "hidden");
+          assert.equal($container.css("cursor"), "move");
+        });
+      });
+
+      suite("canScroll()", function () {
+        test("should return true", function () {
+          assert.isTrue($container.data("plugin_autoScroll").canScroll());
+        });
+      });
+
+      suite("play() and pause()", function () {
+        test("should hold for 5 seconds and then transition", function (done) {
+          var position = $("#container2 div").position();
+
+          $container.data("plugin_autoScroll").play();
+
+          setTimeout(function () {
+            assert.deepEqual($("#container2 div").position(), position, "content has not transitioned");
+          }, 4500);
+
+          setTimeout(function () {
+            assert.notDeepEqual($("#container2 div").position(), position, "content has transitioned");
+            done();
+          }, 6000);
+
+        });
+
+        test("should pause the auto transitions using pause()", function (done) {
+          var position;
+
+          $container.data("plugin_autoScroll").pause();
+
+          position = $("#container2 div").position();
+
+          setTimeout(function () {
+            assert.deepEqual($("#container2 div").position(), position);
+            done();
+          },6000);
+        });
+
+        test("should resume transitioning after 5 seconds using play()", function (done) {
+          var position = $("#container2 div").position();
+
+          $container.data("plugin_autoScroll").play();
+
+          setTimeout(function () {
+            // ensure its been scrolling
+            assert.notDeepEqual($("#container2 div").position(), position);
+            done();
+          },6000);
+        });
+      });
+
+      suite("complete", function () {
+
+        test("should fade out content and trigger 'done'", function (done) {
+
+          this.timeout(20000);
+
+          function check() {
+            if (parseFloat($page.css("opacity")) === 0) {
+              assert(spy.calledOnce, "done() has been triggered");
+              done();
+            }
+            else {
+              setTimeout(function() {
+                check();
+              }, 1000);
+            }
+          }
+
+          check();
+        });
+
+        test("should fade in content and transition with next play() call", function (done) {
+          var position = $("#container2 div").position();
+
+          $container.data("plugin_autoScroll").play();
+
+          function check() {
+            if (parseFloat($page.css("opacity")) === 1) {
+
+              // content is now visible and should hold for 5 seconds
+              setTimeout(function () {
+                assert.deepEqual($("#container2 div").position(), position, "content has not transitioned");
+              }, 3000);
+
+              // content should transition after 5 seconds
+              setTimeout(function () {
+                assert.notDeepEqual($("#container2 div").position(), position, "content has transitioned");
+                done();
+              }, 5000);
+
+            }
+            else {
+              setTimeout(function() {
+                check();
+              }, 1000);
+            }
+          }
+
+          check();
+
+        });
+
+      });
+
+      suite("destroy()", function () {
+        test("should remove autoscroll from container using destroy()", function (done) {
+          assert.isDefined($container.data("plugin_autoScroll"));
+
+          var position = $("#container2 div").position();
+
+          $container.data("plugin_autoScroll").destroy();
+
+          setTimeout(function() {
+            assert.deepEqual($("#container2 div").position(), position, "content has not transitioned");
+
+            assert.isUndefined($container.data("plugin_autoScroll"), "plugin removed");
+
+            assert.isNull(document.querySelector("#container2 div div.page"), "html markup reverted");
+            assert.equal($container.css("cursor"), "auto", "mouse cursor back to normal");
+
+            done();
+          },6000);
+
+        });
+      });
+
+    });
+
+  });
+
+</script>
+
+</body>
+</html>

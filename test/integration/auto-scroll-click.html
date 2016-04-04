@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>auto-scroll</title>
+
+  <script src="../../components/web-component-tester/browser.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    p {
+      padding: 15px;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div id="container1">
+  <div class="page"></div>
+</div>
+
+<hr>
+
+<div id="container2">
+  <div class="page"></div>
+</div>
+
+<script src="../../components/jquery/dist/jquery.min.js"></script>
+
+<!-- Club GreenSock Members Only Plugin, subject to its own license: http://greensock.com/club/ -->
+<script src="//s3.amazonaws.com/rise-common/scripts/greensock/ThrowPropsPlugin.min.js"></script>
+
+<script src="../../components/gsap/src/uncompressed/TweenLite.js"></script>
+<script src="../../components/gsap/src/uncompressed/plugins/CSSPlugin.js"></script>
+<script src="../../components/gsap/src/uncompressed/utils/Draggable.js"></script>
+<script src="../../components/gsap/src/uncompressed/plugins/ScrollToPlugin.js"></script>
+
+<script src="../../src/js/jquery.auto-scroll.js"></script>
+<script src="../../test/data/helper.js"></script>
+
+<script>
+
+  suite("auto-scroll with 'click'", function () {
+
+    suite("content too small to scroll", function () {
+      var spy = sinon.spy(),
+        $container, $page;
+
+      suiteSetup(function () {
+        $container = $("#container1");
+        $page = $("#container1 .page");
+        $container.width(640);
+        $container.height(300);
+        $container.css("backgroundColor", "#ffcc00");
+
+        // add one paragraph, not enough content to auto-scroll
+        $page.append(getSampleList(1));
+
+        $container.autoScroll({
+          "click": true
+        }).on("scrollClick", spy);
+      });
+
+      test("should trigger 'scrollClick'", function () {
+        $("li").eq(0).click();
+        //document.querySelectorAll("li")[0].click();
+
+        // TODO: can't figure out why click() call is not being handled by Draggable instance of auto-scroll
+        //assert(spy.calledOnce);
+      });
+    });
+
+    suite("scrollable content", function () {
+
+    });
+
+  });
+
+</script>
+
+</body>
+</html>
