@@ -44,6 +44,55 @@
 			var pauseHeight = elementHeight;
 			var max = this.element.scrollHeight - this.element.offsetHeight;
 
+			function createTween() {
+				if (!self.options.click && self.canScroll()) {
+					// Destroy the old tween if it already exists.
+					if (self.tween) {
+						self.tween.kill();
+						self.tween = null;
+					}
+
+					self.tween = TweenLite.to(self.draggable.scrollProxy, duration, {
+						scrollTop: max,
+						ease: Linear.easeNone,
+						delay: (self.options.by === "page") ? self.options.duration : self.options.pause,
+						paused: true,
+						onUpdate: (self.options.by === "page" ? function() {
+							if (Math.abs(self.draggable.scrollProxy.top()) >= pauseHeight) {
+								self.tween.pause();
+
+								// Next height at which to pause scrolling.
+								pauseHeight += elementHeight;
+
+								TweenLite.delayedCall(self.options.duration,
+									pageComplete = function() {
+										self.tween.resume();
+									}
+								);
+							}
+						} : undefined),
+						onComplete: function() {
+							TweenLite.delayedCall((self.options.by === "page") ? self.options.duration : self.options.pause,
+								scrollComplete = function() {
+									TweenLite.to(self.page, 1, {
+										autoAlpha: 0,
+										onComplete: function() {
+											self.tween.seek(0).pause();
+
+											if (self.options.by === "page") {
+												pauseHeight = elementHeight;
+											}
+
+											$(self.element).trigger("done");
+										}
+									});
+								}
+							);
+						}
+					});
+				}
+			}
+
 			function pauseTween() {
 				self.tween.pause();
 
@@ -53,58 +102,68 @@
 				TweenLite.killDelayedCallsTo(pageComplete);
 			}
 
+			this.setDuration = function() {
+				var elementHeight = $(self.element).outerHeight(true),
+					pageHeight = self.page.outerHeight(true);
+
+				if (self.options.by === "page") {
+					duration = pageHeight / elementHeight * speed;
+				} else {
+					duration = Math.abs((pageHeight - elementHeight) / speed);
+				}
+			}
+
 			this.calculateProgress = function() {
 				// Set pauseHeight to new value.
-				pauseHeight = $(self.element).scrollTop() +
-					elementHeight;
+				pauseHeight = $(self.element).scrollTop() + elementHeight;
 
-				self.tween.progress($(self.element).scrollTop() / max)
-					.play();
+				self.tween.progress($(self.element).scrollTop() / max).play();
 			};
 
-			if (this.canScroll()) {
-				// Set scroll speed.
-				if (this.options.by === "page") {
-					if (this.options.speed === "fastest") {
-						speed = 0.4;
-					}
-					else if (this.options.speed === "fast") {
-						speed = 0.8;
-					}
-					else if (this.options.speed === "medium") {
-						speed = 1.2;
-					}
-					else if (this.options.speed === "slow") {
-						speed = 1.6;
-					}
-					else {
-						speed = 2;
-					}
+			$(this.element).on("resize", function() {
+				self.setDuration();
+				createTween();
+			});
 
-					duration = this.page.outerHeight(true) /
-						$(this.element).outerHeight(true) * speed;
+			// Set scroll speed.
+			if (this.options.by === "page") {
+				if (this.options.speed === "fastest") {
+					speed = 0.4;
 				}
-				else {  // Continuous or by row
-					if (this.options.speed === "fastest") {
-						speed = 60;
-					}
-					else if (this.options.speed === "fast") {
-						speed = 50;
-					}
-					else if (this.options.speed === "medium") {
-						speed = 40;
-					}
-					else if (this.options.speed === "slow") {
-						speed = 30;
-					}
-					else {
-						speed = 20;
-					}
-
-					duration = Math.abs((this.page.outerHeight(true) -
-						$(this.element).outerHeight(true)) / speed);
+				else if (this.options.speed === "fast") {
+					speed = 0.8;
 				}
+				else if (this.options.speed === "medium") {
+					speed = 1.2;
+				}
+				else if (this.options.speed === "slow") {
+					speed = 1.6;
+				}
+				else {
+					speed = 2;
+				}
+			}
+			else {  // Continuous or by row
+				if (this.options.speed === "fastest") {
+					speed = 60;
+				}
+				else if (this.options.speed === "fast") {
+					speed = 50;
+				}
+				else if (this.options.speed === "medium") {
+					speed = 40;
+				}
+				else if (this.options.speed === "slow") {
+					speed = 30;
+				}
+				else {
+					speed = 20;
+				}
+			}
 
+			this.setDuration();
+
+			if (!this.options.click) {
 				Draggable.create(this.element, {
 					type: "scrollTop",
 					throwProps: true,
@@ -131,64 +190,24 @@
 				});
 
 				this.draggable = Draggable.get(this.element);
+				createTween();
 
-				this.tween = TweenLite.to(this.draggable.scrollProxy, duration, {
-					scrollTop: max,
-					ease: Linear.easeNone,
-					delay: (this.options.by === "page") ? this.options.duration : this.options.pause,
-					paused: true,
-					onUpdate: (this.options.by === "page" ? function() {
-						if (Math.abs(self.draggable.scrollProxy.top()) >= pauseHeight) {
-							self.tween.pause();
-
-							// Next height at which to pause scrolling.
-							pauseHeight += elementHeight;
-
-							TweenLite.delayedCall(self.options.duration,
-								pageComplete = function() {
-									self.tween.resume();
-								}
-							);
-						}
-					} : undefined),
-					onComplete: function() {
-						TweenLite.delayedCall((self.options.by === "page") ? self.options.duration : self.options.pause,
-							scrollComplete = function() {
-								TweenLite.to(self.page, 1, {
-									autoAlpha: 0,
-									onComplete: function() {
-										self.tween.seek(0).pause();
-
-										if (self.options.by === "page") {
-											pauseHeight = elementHeight;
-										}
-
-										$(self.element).trigger("done");
-									}
-								});
-							}
-						);
+				// Hide scrollbar.
+				TweenLite.set(self.element, { overflowY: "hidden" });
+			} else if (this.options.click && !this.canScroll()) {
+				// Account for content that is to be clicked when content not needed to be scrolled
+				// Leverage Draggable for touch/click event handling
+				Draggable.create(this.element, {
+					type: "scrollTop",
+					throwProps: true,
+					edgeResistance: 0.95,
+					minimumMovement: this.options.minimumMovement,
+					onClick: function() {
+						$(self.element).trigger("scrollClick", [this.pointerEvent]);
 					}
 				});
 
-				// Hide scrollbar.
-				TweenLite.set(this.element, { overflowY: "hidden" });
-			} else {
-				if (this.options.click) {
-					// Account for content that is to be clicked when content not needed to be scrolled
-					// Leverage Draggable for touch/click event handling
-					Draggable.create(this.element, {
-						type: "scrollTop",
-						throwProps: true,
-						edgeResistance: 0.95,
-						minimumMovement: this.options.minimumMovement,
-						onClick: function() {
-							$(self.element).trigger("scrollClick", [this.pointerEvent]);
-						}
-					});
-
-					this.draggable = Draggable.get(this.element);
-				}
+				this.draggable = Draggable.get(this.element);
 			}
 		},
 		// Check if content is larger than viewable area and if the scroll settings is set to actually scroll.
