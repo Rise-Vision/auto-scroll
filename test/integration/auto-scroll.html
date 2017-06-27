@@ -109,7 +109,7 @@
 
           $container.data("plugin_autoScroll").destroy();
 
-          assert.isUndefined($container.data("plugin_autoScroll"), "plugin removed");
+          assert.isNull($container.data("plugin_autoScroll"), "plugin removed");
         });
       });
 
@@ -261,7 +261,7 @@
             // content isn't still scrolling
             assert.deepEqual($("#container2 div").position(), position, "content not scrolling");
 
-            assert.isUndefined($container.data("plugin_autoScroll"), "plugin removed");
+            assert.isNull($container.data("plugin_autoScroll"), "plugin removed");
 
             assert.isNull(document.querySelector("#container2 div div.page"), "html markup reverted");
             assert.equal($container.css("cursor"), "auto", "mouse cursor back to normal");
