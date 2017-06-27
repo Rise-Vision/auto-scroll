@@ -196,7 +196,7 @@
 			return this.options && (this.page.height() > $(this.element).height());
 		},
 		destroy: function() {
-			$(this.element).removeData();
+			$.data(this.element, "plugin_" + pluginName, null);
 			if (this.tween) {
 				this.tween.kill();
 			}
