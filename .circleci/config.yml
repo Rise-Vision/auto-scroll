@@ -35,7 +35,7 @@ jobs:
       - restore_cache:
           key: node-cache-{{ checksum "package.json" }}
       # latest stable chrome
-      - run: curl -L -o google-chrome-stable.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+      - run: curl -L -o google-chrome-stable.deb https://archive.org/download/google-chrome-stable_48.0.2564.116-1_i386/google-chrome-stable_48.0.2564.116-1_i386.deb
       - run: sudo dpkg -i google-chrome-stable.deb
       # make chrome lxc-friendly
       - run: sudo sed -i 's|HERE/chrome\"|HERE/chrome\" --disable-setuid-sandbox|g' /opt/google/chrome/google-chrome
