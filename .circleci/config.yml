@@ -57,6 +57,7 @@ jobs:
           key: node-cache-{{ checksum "package.json" }}
       - run: nvm install 8.4.0 && nvm alias default 8.4.0
       - run: npm install -g gulp
+      - run: npm install
       - run: NODE_ENV=<< parameters.stage >> npm run build
 
 workflows:
