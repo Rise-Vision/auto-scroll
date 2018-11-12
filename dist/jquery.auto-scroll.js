@@ -157,7 +157,7 @@
 								TweenLite.to(self.page, 1, {
 									autoAlpha: 0,
 									onComplete: function() {
-										self.tween.seek(0).pause();
+										self.tween.pause().seek(0);
 
 										if (self.options.by === "page") {
 											pauseHeight = elementHeight;

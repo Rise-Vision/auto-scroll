@@ -1,0 +1,87 @@
+version: 2.1
+
+jobs:
+  setup:
+    working_directory: ~/Rise-Vision/auto-scroll
+    shell: /bin/bash --login
+    docker: &BUILDIMAGE
+      - image: circleci/build-image:ubuntu-14.04-XXL-upstart-1189-5614f37
+        command: /sbin/init
+    steps:
+      - checkout
+      - restore_cache:
+          key: node-cache-{{ checksum "package.json" }}
+      - run: nvm install 8.4.0 && nvm alias default 8.4.0
+      - run: npm install -g gulp bower
+      - run: npm install
+      - run: bower install
+      - save_cache:
+          key: node-cache-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./components
+
+  test:
+    working_directory: ~/Rise-Vision/auto-scroll
+    shell: /bin/bash --login
+    docker: *BUILDIMAGE
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: node-cache-{{ checksum "package.json" }}
+      # latest stable chrome
+      - run: curl -L -o google-chrome-stable.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+      - run: sudo dpkg -i google-chrome-stable.deb
+      # make chrome lxc-friendly
+      - run: sudo sed -i 's|HERE/chrome\"|HERE/chrome\" --disable-setuid-sandbox|g' /opt/google/chrome/google-chrome
+      - run: nvm install 8.4.0 && nvm alias default 8.4.0
+      - run: NODE_ENV=prod npm run test
+
+  build:
+    parameters:
+      stage:
+        type: string
+    working_directory: ~/Rise-Vision/widget-google-calendar
+    shell: /bin/bash --login
+    docker: *BUILDIMAGE
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: node-cache-{{ checksum "package.json" }}
+      - run: nvm install 8.4.0 && nvm alias default 8.4.0
+      - run: npm install -g gulp
+      - run: npm install
+      - run: NODE_ENV=<< parameters.stage >> npm run build
+
+workflows:
+  workflow1:
+    jobs:
+      - setup
+      - test:
+          requires:
+            - setup
+      - build:
+          stage: test
+          name: build-staging
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - /^(feature|fix|chore)[/].*/
+      - build:
+          stage: prod
+          name: build-production
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - master
