@@ -1,6 +1,6 @@
 {
   "name": "auto-scroll",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Auto-scroll is a jQuery plugin that can be integrated into Widgets to enable auto-scroll and swipe functionality.",
   "main": "gulpfile.js",
   "scripts": {
