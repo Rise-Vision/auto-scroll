@@ -19,18 +19,18 @@
   "homepage": "https://github.com/Rise-Vision/auto-scroll",
   "devDependencies": {
     "colors": "~1.0.3",
-    "del": "~1.1.1",
-    "gulp": "~3.8.3",
+    "del": "~1.2.1",
+    "gulp": "~4.0.2",
     "gulp-bower": "~0.0.10",
     "gulp-bump": "~0.1.8",
     "gulp-concat": "^2.2.0",
-    "gulp-jshint": "~1.5.5",
+    "gulp-jshint": "~2.1.0",
     "gulp-rename": "~1.2.0",
     "gulp-uglify": "^0.3.1",
-    "gulp-watch": "^0.6.8",
+    "gulp-watch": "^5.0.1",
     "jshint-stylish": "^0.2.0",
     "run-sequence": "^0.3.2",
-    "web-component-tester": "5.0"
+    "web-component-tester": "6.9"
   },
   "optionalDependencies": {
     "wct-local": "<2.0.16"
